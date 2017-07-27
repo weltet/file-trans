@@ -36,43 +36,8 @@ class Client2 extends JFrame{
 		this.fileList.setSelectedIndex(0);
 
 	}
-
-	public Client2(Socket client) {
-
-		this.setTitle("ddd");
-		this.setSize(300, 200);
-		this.setLocationRelativeTo(null);
-		this.getDefaultCloseOperation();
-
-
-		try {
-			this.getFile(client);
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-
-		this.compInit();
-		this.setVisible(true);
-
-	}
-
-	private void getFile(Socket client) throws Exception{
-
-		dis = new DataInputStream(client.getInputStream());
-		
-		os = client.getOutputStream();
-
-		fileNum = dis.readInt();
-		fileName.add("---file list---");
-		int count = 0;
-		while(count<fileNum) {
-			String file = dis.readUTF();
-			fileName.add(file);
-			count++;
-		}
-
-
+	
+	public void eventInit(){
 		this.fileList.addActionListener(new ActionListener() {
 
 			@Override
@@ -113,7 +78,42 @@ class Client2 extends JFrame{
 			}
 
 		});
+	}
+	public Client2(Socket client) {
 
+		this.setTitle("ddd");
+		this.setSize(300, 200);
+		this.setLocationRelativeTo(null);
+		this.getDefaultCloseOperation();
+
+
+		try {
+			this.getFile(client);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	
+		this.compInit();
+		this.eventInit();
+		this.setVisible(true);
+
+	}
+
+	private void getFile(Socket client) throws Exception{
+
+		dis = new DataInputStream(client.getInputStream());
+		
+		os = client.getOutputStream();
+
+		fileNum = dis.readInt();
+		fileName.add("---file list---");
+		int count = 0;
+		while(count<fileNum) {
+			String file = dis.readUTF();
+			fileName.add(file);
+			count++;
+		}
 
 	}
 
