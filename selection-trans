@@ -1,0 +1,129 @@
+import java.awt.Dimension;
+import java.awt.FlowLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.OutputStream;
+import java.net.Socket;
+import java.util.Vector;
+
+import javax.swing.JButton;
+import javax.swing.JComboBox;
+import javax.swing.JFrame;
+import javax.swing.JPanel;
+
+class Client2 extends JFrame{
+
+	private OutputStream os;
+	private DataInputStream dis = null;
+	private DataOutputStream dos = null;
+	private int fileNum;
+	private Vector<String> fileName = new Vector<String>();
+	private JComboBox fileList = new JComboBox(fileName);
+	private JButton downloadButton = new JButton("download");
+	private JPanel main = new JPanel( new FlowLayout(FlowLayout.LEFT));
+
+	private void compInit() {
+
+		this.fileList.setPreferredSize(new Dimension(180,30));
+		this.downloadButton.setSize(50,30);
+		this.main.add(fileList);
+		this.main.add(downloadButton);
+		this.add(main);
+		this.fileList.setSelectedIndex(0);
+
+	}
+
+	public Client2(Socket client) {
+
+		this.setTitle("ddd");
+		this.setSize(300, 200);
+		this.setLocationRelativeTo(null);
+		this.getDefaultCloseOperation();
+
+
+		try {
+			this.getFile(client);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		this.compInit();
+		this.setVisible(true);
+
+	}
+
+	private void getFile(Socket client) throws Exception{
+
+		dis = new DataInputStream(client.getInputStream());
+		
+		os = client.getOutputStream();
+
+		fileNum = dis.readInt();
+		fileName.add("---file list---");
+		int count = 0;
+		while(count<fileNum) {
+			String file = dis.readUTF();
+			fileName.add(file);
+			count++;
+		}
+
+
+		this.fileList.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				String selectedFile = String.valueOf(fileList.getSelectedItem());
+				System.out.println(selectedFile);
+			}
+
+		});
+		this.downloadButton.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				String selectedFile = String.valueOf(fileList.getSelectedItem());
+				System.out.println(selectedFile);
+
+
+				try {
+
+
+					DataOutputStream tmp = new DataOutputStream(os);
+					tmp.writeUTF(selectedFile);
+					tmp.flush();
+
+					int filesize = dis.readInt();
+					byte[] filecontents = new byte[filesize];
+					dis.readFully(filecontents);	
+
+					File f = new File("C:/Users/ITBANK403-07/Desktop/"+selectedFile);
+
+					FileOutputStream fos = new FileOutputStream(f);
+					DataOutputStream dos = new DataOutputStream(fos);
+					dos.writeUTF(selectedFile);
+					dos.flush();
+				}catch (Exception e2) {
+					e2.printStackTrace();
+				}
+			}
+
+		});
+
+
+	}
+
+	public static void main(String[] args)throws Exception {
+
+		Socket client = new Socket("192.168.53.250",40000);
+		new Client2(client);
+
+	}
+}
+
+
+
